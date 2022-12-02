@@ -25,7 +25,7 @@ func main() {
 	defer f.Close()
 
 	// Create our sorter and counter builder closure.  Create a waitgroup for the goroutines
-	calorieSorter := dayone.CounterSorter{}
+	calorieSorter := dayone.NewCounterSorter()
 	buildCalorieCounter := dayone.NewCalorieCounter()
 	wg := &sync.WaitGroup{}
 
@@ -69,4 +69,13 @@ func main() {
 	// calorie total it contains.
 	wg.Wait()
 	fmt.Println(calorieSorter.OrderedList[len(calorieSorter.OrderedList)-1].Total)
+
+	top3Sum := 0
+	for i := 1; i <= 3; i++ {
+		v := calorieSorter.OrderedList[len(calorieSorter.OrderedList)-i].Total
+		top3Sum += v
+	}
+
+	fmt.Println(top3Sum)
+
 }

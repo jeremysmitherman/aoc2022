@@ -41,12 +41,14 @@ type CounterSorter struct {
 	lock        *sync.Mutex
 }
 
+func NewCounterSorter() *CounterSorter {
+	return &CounterSorter{
+		lock: &sync.Mutex{},
+	}
+}
+
 // Insert takes a counter and inserts it in order of Total calories
 func (c *CounterSorter) Insert(counter *CalorieCounter, waitGroup *sync.WaitGroup) {
-	if c.lock == nil {
-		c.lock = &sync.Mutex{}
-	}
-
 	// Add to the waitgroup and lock the mutex
 	waitGroup.Add(1)
 	c.lock.Lock()
@@ -65,12 +67,14 @@ func (c *CounterSorter) Insert(counter *CalorieCounter, waitGroup *sync.WaitGrou
 
 	// I love Go sometimes
 	var newList []*CalorieCounter
-	for _, currentCounter := range c.OrderedList {
-		if counter.Total <= currentCounter.Total {
+	for i, currentCounter := range c.OrderedList {
+		if currentCounter.ID != counter.ID && counter.Total <= currentCounter.Total {
+			newList = append(newList, counter)
+			newList = append(newList, c.OrderedList[i:len(c.OrderedList)]...)
+			break
+		} else {
 			newList = append(newList, currentCounter)
-			continue
 		}
-		newList = append(newList, currentCounter)
 	}
 	c.OrderedList = newList
 }
